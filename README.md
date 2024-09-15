@@ -2,7 +2,13 @@
 
 ## Uso
 
-Ejecutar servidor:
+### Instalar dependencias
+
+```bash
+pip install -r requirements.txt
+```
+
+### Ejecutar servidor
 
 ```bash
 uvicorn app:app --reload
