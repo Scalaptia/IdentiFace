@@ -5,15 +5,20 @@ import dlib
 import matplotlib.pyplot as plt
 
 class Functions():
-    def preprocess(method,input_image, target_size=(128, 128)):
+    @staticmethod
+    def preprocess(method, input_image, target_size=(128, 128)):
         "Function to preprocess the extracted faces"
         # Initialize the face detector and landmark predictor
         detector = dlib.get_frontal_face_detector()
         predictor = dlib.shape_predictor("Utilities/Face-Detection/shape_predictor_68_face_landmarks.dat")
         
         if method == "offline":
-            # Read the original image
-            img = cv2.imread(input_image)
+            if isinstance(input_image, str):
+                # Read the original image from file path
+                img = cv2.imread(input_image)
+            else:
+                # Use the provided image array
+                img = input_image
             img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         else:
             img = cv2.cvtColor(input_image, cv2.COLOR_BGR2GRAY)
@@ -48,7 +53,7 @@ class Functions():
             # Expand the dimensions to match the input shape expected by the model
             normalized_face = np.expand_dims(normalized_face, axis=0)
 
-            return path,normalized_face
+            return path, normalized_face
 
         # If no faces are found, return None
         return None
