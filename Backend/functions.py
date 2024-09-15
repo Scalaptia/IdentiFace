@@ -1,62 +1,45 @@
 import cv2
-import tensorflow as tf
 import numpy as np
 import dlib
-import matplotlib.pyplot as plt
+import stone as st
+import os
 
 class Functions():
     @staticmethod
-    def preprocess(input_image, target_size=(128, 128)):
+    def preprocess(input_image, target_size_shape=(128, 128), target_size_gender=(48, 48)):
         "Function to preprocess the extracted faces"
-        # Initialize the face detector and landmark predictor
         detector = dlib.get_frontal_face_detector()
         predictor = dlib.shape_predictor("Utilities/Face-Detection/shape_predictor_68_face_landmarks.dat")
         
-        # Check if the input image is a file path or an image array
-        if isinstance(input_image, str):
-            # Read the original image from file path
-            img = cv2.imread(input_image)
-        else:
-            # Use the provided image array
-            img = input_image
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            
-        # Detect faces in the image
+        img = cv2.cvtColor(input_image, cv2.COLOR_BGR2GRAY)
         faces = detector(img)
 
-        # Process the first detected face
         if faces:
-            # Get the first face from the list of detected faces
             face = faces[0]
-
-            # Draw a rectangle around the face
+            landmarks = predictor(img, face)
             cv2.rectangle(img, (face.left(), face.top()), (face.right(), face.bottom()), (0, 255, 0), 2)
-
-            # Extract the face region
             extracted_face = img[face.top():face.bottom(), face.left():face.right()]
 
-            # Check if the extracted face is not empty
             if not extracted_face.size:
                 return None
 
-            # Resize the face to the target size
-            resized_face = cv2.resize(extracted_face, target_size)
-            path = 'test.jpg'
-            # Save the resized face as 'test.jpg'
-            cv2.imwrite(path, resized_face)
+            # Resize for shape model
+            resized_face_shape = cv2.resize(extracted_face, target_size_shape)
+            normalized_face_shape = resized_face_shape / 255.0
+            expanded_face_shape = np.expand_dims(normalized_face_shape, axis=0)
 
-            # Normalize the pixel values to the range [0, 1]
-            normalized_face = resized_face / 255.0
+            # Resize for gender model
+            resized_face_gender = cv2.resize(extracted_face, target_size_gender)
+            normalized_face_gender = resized_face_gender / 255.0
+            reshaped_face_gender = np.expand_dims(normalized_face_gender, axis=-1)
+            expanded_face_gender = np.expand_dims(reshaped_face_gender, axis=0)
 
-            # Expand the dimensions to match the input shape expected by the model
-            normalized_face = np.expand_dims(normalized_face, axis=0)
+            return expanded_face_shape, expanded_face_gender
 
-            return path, normalized_face
-
-        # If no faces are found, return None
         return None
 
     "Shape prediciton Function"
+    @staticmethod
     def predict_shape(preprocessed_image, model):
         # Make predictions using the loaded model
         predictions = model.predict(preprocessed_image)
@@ -76,22 +59,44 @@ class Functions():
         elif predicted_class_index == 4:
             predicted_class = 'Oval'
 
-        # Return the predictions
-        print(predictions)
         return predicted_class, predictions
     
     
     "Gender Classification Function"
+    @staticmethod
     def predict_gender(preprocessed_image, model):
         # Make predictions using the loaded model
         predictions = model.predict(preprocessed_image)
 
-        # Get the index of the highest element in the predictions array
-        predicted_index = np.argmax(predictions)
-
         # Determine the predicted class based on the index
+        predicted_index = np.argmax(predictions)
         predicted_class = 'Male' if predicted_index == 1 else 'Female'
-        # Return the predictions
-        print(predictions)
         
-        return predicted_class, predictions 
+        return predicted_class, predictions
+    
+    "Skin Tone Extraction Function"
+    @staticmethod
+    def extract_skin_tone(image):
+        # Save the image to a temporary file
+        image_path = 'temp.jpg'
+        cv2.imwrite(image_path, image)
+
+        result = st.process(
+            filename_or_url=image_path,
+            image_type='color',
+            tone_palette=None,
+            tone_labels=None,
+            n_dominant_colors=5, # Number of dominant colors to extract
+            return_report_image=False
+        )
+
+        # Remove the temporary image file
+        os.remove(image_path)
+        
+        # Extract and return the skin tone palette from the result
+        if 'faces' in result and len(result['faces']) > 0:
+            dominant_colors = result['faces'][0].get('dominant_colors', [])
+            tone_palette = [color['color'] for color in dominant_colors]
+            return tone_palette
+            
+        return []
