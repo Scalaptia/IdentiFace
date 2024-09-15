@@ -1,8 +1,8 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile # fastapi, uvicorn, python-multipart
 from fastapi.responses import JSONResponse
-import cv2
-import numpy as np
-from keras.models import load_model
+import cv2 # opencv-python
+import numpy as np # numpy
+from keras.models import load_model # keras
 from Backend.functions import Functions
 
 app = FastAPI()
@@ -31,9 +31,9 @@ async def predict(file: UploadFile = File(...)):
 
         return JSONResponse(
             content={
-                "shape": shape_predictions[0],
-                "gender": gender_predictions[0],
-                "skin_tone_palette": skin_tone_palette,
+                "forma": shape_predictions[0],
+                "genero": gender_predictions[0],
+                "tono_piel": skin_tone_palette,
             }
         )
 

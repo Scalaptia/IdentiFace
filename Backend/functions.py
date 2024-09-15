@@ -1,7 +1,7 @@
-import cv2
-import numpy as np
-import dlib
-import stone as st
+import cv2 # opencv-python
+import numpy as np # numpy
+import dlib # dlib
+import stone as st # skin-tone-classifier
 import os
 
 class Functions():
@@ -49,15 +49,20 @@ class Functions():
         predicted_class = None
 
         if predicted_class_index == 0:
-            predicted_class = 'Oblong'
+            # Oblong
+            predicted_class = 'Alargada'
         elif predicted_class_index == 1:
-            predicted_class = 'Square'
+            # Square
+            predicted_class = 'Cuadrada'
         elif predicted_class_index == 2:
-            predicted_class = 'Round'
+            # Round
+            predicted_class = 'Redonda'
         elif predicted_class_index == 3:
-            predicted_class = 'Heart'
+            # Heart
+            predicted_class = 'Corazón' 
         elif predicted_class_index == 4:
-            predicted_class = 'Oval'
+            # Oval
+            predicted_class = 'Ovalada'
 
         return predicted_class, predictions
     
@@ -70,7 +75,7 @@ class Functions():
 
         # Determine the predicted class based on the index
         predicted_index = np.argmax(predictions)
-        predicted_class = 'Male' if predicted_index == 1 else 'Female'
+        predicted_class = 'Masculino' if predicted_index == 1 else 'Femenino'
         
         return predicted_class, predictions
     
@@ -86,7 +91,7 @@ class Functions():
             image_type='color',
             tone_palette=None,
             tone_labels=None,
-            n_dominant_colors=5, # Number of dominant colors to extract
+            n_dominant_colors=3, # Number of dominant colors to extract
             return_report_image=False
         )
 
