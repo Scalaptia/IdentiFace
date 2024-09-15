@@ -11,7 +11,7 @@ app = FastAPI()
 model = load_model("Models/shape.h5")
 
 @app.post("/predict/")
-async def predict_face_shape(file: UploadFile = File(...)):
+async def predict(file: UploadFile = File(...)):
     try:
         # Read the uploaded image file
         image_data = await file.read()
@@ -19,27 +19,16 @@ async def predict_face_shape(file: UploadFile = File(...)):
         image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
 
         # Preprocess the image
-        path, preprocessed_image = Functions.preprocess("offline", image)
+        path, preprocessed_image = Functions.preprocess(image)
 
         # Make predictions using the loaded model
-        predictions = model.predict(preprocessed_image)
+        shape_predictions = Functions.predict_shape(preprocessed_image, model)
+        gender_predictions = Functions.predict_gender(preprocessed_image, model)
 
-        # Determine the predicted class based on the threshold
-        predicted_class_index = np.argmax(predictions)
-        predicted_class = None
-
-        if predicted_class_index == 0:
-            predicted_class = 'Oblong'
-        elif predicted_class_index == 1:
-            predicted_class = 'Square'
-        elif predicted_class_index == 2:
-            predicted_class = 'Round'
-        elif predicted_class_index == 3:
-            predicted_class = 'Heart'
-        elif predicted_class_index == 4:
-            predicted_class = 'Oval'
-
-        return JSONResponse(content={"shape": predicted_class})
+        return JSONResponse(
+            content={"shape": shape_predictions[0],
+                     "gender": gender_predictions[0],
+        })
 
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
