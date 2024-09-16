@@ -1,4 +1,4 @@
-# API detección de caras y sexo
+# IdentiFace API
 
 ## Uso
 

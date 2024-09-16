@@ -5,6 +5,6 @@ numpy
 keras
 python-multipart
 tensorflow
-dlib
 skin-tone-classifier
 gdown
+requests
