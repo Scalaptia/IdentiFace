@@ -18,6 +18,14 @@ uvicorn app:app --reload
 
 ### POST /predict
 
+File:
+
 ```bash
 curl -X POST "http://localhost:8000/predict/" -F "file=@path/to/image"
+```
+
+URL:
+
+```bash
+curl -X POST "http://localhost:8000/predict/" -d "url=https://example.com/image.jpg"
 ```
