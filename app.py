@@ -6,12 +6,31 @@ from keras.models import load_model # keras
 from Backend.functions import Functions
 import requests
 from io import BytesIO
+import os
+import gdown
 
 app = FastAPI()
 
+# URLs for the models on Google Drive
+shape_model_url = "https://drive.google.com/uc?id=1JnAi2DVwt0_XbVpRcpVN3pQgR_8xGHuK"
+gender_model_url = "https://drive.google.com/uc?id=1MWaJ6hcF9xWfW3zSkM3V9Mgxopq18R3z"
+
+# Local paths to save the models
+shape_model_path = "Models/shape.h5"
+gender_model_path = "Models/gender.h5"
+
+
+def download_model_from_google_drive(url, local_path):
+    if not os.path.exists(local_path):
+        gdown.download(url, local_path, quiet=False)
+
+# Download models if they do not exist locally
+download_model_from_google_drive(shape_model_url, shape_model_path)
+download_model_from_google_drive(gender_model_url, gender_model_path)
+
 # Load the pre-trained models
-shape_model = load_model("Models/shape.h5")
-gender_model = load_model("Models/gender.h5")
+shape_model = load_model(shape_model_path)
+gender_model = load_model(gender_model_path)
 
 "Accepts an image file or URL and returns the predicted shape, gender, and skin tone palette"
 @app.post("/predict/")
