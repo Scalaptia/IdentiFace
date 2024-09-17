@@ -64,11 +64,16 @@ async def predict(file: UploadFile = File(None), url: str = Form(None)):
         # Extract skin tone palette
         skin_tone_palette = Functions.extract_skin_tone(image)
 
+        # Suggest colors based on the skin tone palette
+        closest_tone, recommended_palettes = Functions.suggest_colors(skin_tone_palette[0])
+
         return JSONResponse(
             content={
                 "forma": shape_predictions[0],
                 "genero": gender_predictions[0],
                 "tono_piel": skin_tone_palette,
+                "tono_mas_cercano": closest_tone,
+                "paletas_recomendadas": recommended_palettes,
             }
         )
 

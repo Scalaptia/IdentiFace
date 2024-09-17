@@ -3,6 +3,8 @@ import numpy as np # numpy
 import dlib # dlib
 import stone as st # skin-tone-classifier
 import os
+from webcolors import hex_to_rgb
+from .colors import skin_tone_categories, seasons, ColorFunctions
 
 class Functions():
     @staticmethod
@@ -66,7 +68,6 @@ class Functions():
 
         return predicted_class, predictions
     
-    
     "Gender Classification Function"
     @staticmethod
     def predict_gender(preprocessed_image, model):
@@ -91,7 +92,7 @@ class Functions():
             image_type='color',
             tone_palette=None,
             tone_labels=None,
-            n_dominant_colors=3, # Number of dominant colors to extract
+            n_dominant_colors=5, # Number of dominant colors to extract
             return_report_image=False
         )
 
@@ -105,3 +106,29 @@ class Functions():
             return tone_palette
             
         return []
+    
+    @staticmethod
+    def closest_skin_tone(skin_hex):
+        skin_rgb = hex_to_rgb(skin_hex)
+        min_distance = float('inf')
+        closest_tone = None
+
+        for tone, tone_hex in skin_tone_categories.items():
+            tone_rgb = hex_to_rgb(tone_hex)
+            distance = ColorFunctions.color_distance(skin_rgb, tone_rgb)
+            if distance < min_distance:
+                min_distance = distance
+                closest_tone = tone
+        
+        return closest_tone
+
+    @staticmethod
+    def suggest_colors(skin_hex):
+        skin_tone = Functions.closest_skin_tone(skin_hex)
+
+        suggestions = {}
+        for season, tones in seasons.items():
+            if skin_tone in tones:
+                suggestions[season] = tones[skin_tone]
+        
+        return skin_tone, suggestions
